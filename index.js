@@ -3,7 +3,7 @@ const isConsonant = (charCode) => {
 }
 
 const starterCode = (charCode) => {
-    // takes an 'ending code' and returns the corresponding 'starter code'
+    // takes an 'ending code' for a consonant and returns its corresponding 'starter code'
     switch (charCode) {
         case 0x11A8: // ᆨ
             return 0x1100; // ㄱ
@@ -61,14 +61,6 @@ function splitKoreanStr(input) {
         }
     });
 
-    for (let i = 0; i < fullySplit.length; i++) {
-        console.log(fullySplit[i].toString(16))
-        if (isConsonant(fullySplit[i]) && fullySplit[i + 1] === 0x110B) {
-            fullySplit.splice(i + 1, 1);
-            fullySplit[i] = starterCode(fullySplit[i]);
-        }
-    }
-
     return fullySplit;
 }
 
@@ -102,9 +94,58 @@ function splitKoreanChar(combinedChar) {
     }
 }
 
+function resyllabify(input) {
+    const splitInput = splitKoreanStr(input);
+    for (let i = 0; i < splitInput.length; i++) {
+        if (isConsonant(splitInput[i]) && splitInput[i + 1] === 0x110B) {
+            splitInput.splice(i + 1, 1);
+            splitInput[i] = starterCode(splitInput[i]);
+        }
+    }
+    return String.fromCharCode(...splitInput);
+}
+
+function neutralizeCoda(input) {
+    const splitBlocks = input.split('');
+    const finalArray = [];
+    for (let i = 0; i < splitBlocks.length; i++) {
+        // split each block into separate letters
+        splitBlocks[i] = Array.from(splitBlocks[i].normalize('NFD'));
+
+        // convert each letter to its code point
+        for (let j = 0; j < splitBlocks[i].length; j++) {
+            splitBlocks[i][j] = splitBlocks[i][j].codePointAt(0);
+        }
+
+        // check for coda neutralization rules
+        if (splitBlocks[i].length > 2) {
+            switch(splitBlocks[i][2]) {
+                case 0x11C1: // ᇁ
+                    splitBlocks[i][2] = 0x11B8; // ᆸ
+                    break;
+                case 0x11C0: // ᇀ
+                case 0x11BA: // ᆺ
+                case 0x11BD: // ᆽ
+                case 0x11BE: // ᆾ
+                case 0x11C2: // ᇂ
+                    splitBlocks[i][2] = 0x11AE; // ᆮ
+                    break;
+                case 0x11BF: // ᆿ
+                case 0x11A9: // ᆩ
+                    splitBlocks[i][2] = 0x11A8; // ᆨ
+                    break;
+            }
+        }
+        finalArray.push(...splitBlocks[i]);
+    }
+    return String.fromCharCode(...finalArray);
+}
+
 
 function handleSubmit() {
-    const splitInput = splitKoreanStr(document.getElementById('input').value)
-    splitInput.forEach((num) => console.log(String.fromCharCode(num)))
-    document.getElementById('output').innerHTML = `${String.fromCharCode(...splitInput)}`;
+    const rawInput = document.getElementById('input').value;
+    let output = '';
+    output = neutralizeCoda(rawInput);
+    output = resyllabify(output);
+    document.getElementById('output').innerHTML = output;
 }
