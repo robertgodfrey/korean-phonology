@@ -13,8 +13,10 @@
     <h1>
         Enter a Korean word or phrase:
     </h1>
-    <input type="text" id="input" class="border-2 border-black">
-    <button type="button" id="submitBtn" class="border-2 border-black rounded my-4 px-4">Go</button>
+    <form onsubmit="event.preventDefault(); handleSubmit()">
+        <input type="text" id="input" class="border-2 border-black">
+        <button type="submit" id="submitBtn" class="border-2 border-black rounded my-4 px-4">Go</button>
+    </form>
     <div id="output" class="text-2xl"></div>
 </div>
 <script src="index.js"></script>
