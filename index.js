@@ -1,47 +1,52 @@
 const isConsonant = (charCode) => {
-    return (charCode >= 0x1100 && charCode <= 0x1112) || (charCode >= 0x11A8 && charCode <= 0x11C2);
+    return (charCode >= LEADING_KIYEOK && charCode <= LEADING_HIEUH)
+        || (charCode >= TRAILING_KIYEOK && charCode <= TRAILING_KIYEOK);
 }
 
 const starterCode = (charCode) => {
-    // takes an 'ending code' for a consonant and returns its corresponding 'starter code'
+    // takes an 'trailing code' for a consonant and returns its corresponding 'leading code'
     switch (charCode) {
-        case 0x11A8: // ᆨ
-            return 0x1100; // ㄱ
-        case 0x11AB: // ᆫ
-            return 0x1102; // ㄴ
-        case 0x11AE: // ᆮ
-            return 0x1103; // ㄷ
-        case 0x11AF: // ᆯ
-            return 0x1105; // ㄹ
-        case 0x11B7: // ᆷ
-            return 0x1106; // ㅁ
-        case 0x11B8: // ᆸ
-            return 0x1107; // ㅂ
-        case 0x11BA: // ᆺ
-            return 0x1109; // ㅅ
-        case 0x11BD: // ᆽ
-            return 0x110C; // ㅈ
-        case 0x11BE: // ᆾ
-            return 0x110E; // ㅊ
-        case 0x11BF: // ᆿ
-            return 0x110F; // ㅋ
-        case 0x11C0: // ᇀ
-            return 0x1110; // ㅌ
-        case 0x11C1: // ᇁ
-            return 0x1111; // ㅍ
-        case 0x11C2: // ᇂ
-            return 0x1112; // ㅎ
-        case 0x11BB: // ᆻ
-            return 0x110A; // ㅆ
-        case 0x11A9: // ᆩ
-            return 0x1101; // ㄲ
+        case TRAILING_KIYEOK: // ᆨ
+            return LEADING_KIYEOK; // ㄱ
+        case TRAILING_NIEUN: // ᆫ
+            return LEADING_NIEUN; // ㄴ
+        case TRAILING_TIKEUT: // ᆮ
+            return LEADING_TIKEUT; // ㄷ
+        case TRAILING_RIEUL: // ᆯ
+            return LEADING_RIEUL; // ㄹ
+        case TRAILING_MIEUM: // ᆷ
+            return LEADING_MIEUM; // ㅁ
+        case TRAILING_PIEUP: // ᆸ
+            return LEADING_PIEUP; // ㅂ
+        case TRAILING_SIOS: // ᆺ
+            return LEADING_SIOS; // ㅅ
+        case TRAILING_CIEUC: // ᆽ
+            return LEADING_CIEUC; // ㅈ
+        case TRAILING_CHIEUCH: // ᆾ
+            return LEADING_CIEUC; // ㅊ
+        case TRAILING_KHIEUKH: // ᆿ
+            return LEADING_KHIEUKH; // ㅋ
+        case TRAILING_THIEUTH: // ᇀ
+            return LEADING_THIEUTH; // ㅌ
+        case TRAILING_PHIEUPH: // ᇁ
+            return LEADING_PHIEUPH; // ㅍ
+        case TRAILING_HIEUH: // ᇂ
+            return LEADING_HIEUH; // ㅎ
+        case TRAILING_SSANGSIOS: // ᆻ
+            return LEADING_SSANGSIOS; // ㅆ
+        case TRAILING_SSANGKIYEOK: // ᆩ
+            return LEADING_SSANGCIEUC; // ㄲ
         default:
             return charCode;
     }
 }
+
+// fully splits a Korean string into its component characters (including double consonants)
 function splitKoreanStr(input) {
-    const doubleConsonants = [
-        0x11AA, 0x11AC, 0x11AD, 0x11B0, 0x11B1, 0x11B2, 0x11B3, 0x11B4, 0x11B5, 0x11B6, 0x11B9,
+    const trailingDoubleConsonants = [
+        TRAILING_KIYEOKSIOS, TRAILING_NIEUNCIEUC, TRAILING_NIEUNHIEUH, TRAILING_RIEULKIYEOK, TRAILING_RIEULMIEUM,
+        TRAILING_RIEULPIEUP, TRAILING_RIEULSIOS, TRAILING_RIEULTHIEUTH, TRAILING_RIEULPHIEUPH, TRAILING_RIEULHIEUH,
+        TRAILING_PIEUPSIOS,
     ];
 
     // split string into array of characters (does not combine double consonants)
@@ -52,7 +57,7 @@ function splitKoreanStr(input) {
 
     // split double consonants into two separate characters and populate fullySplit
     splitInput.forEach((char) => {
-        if (doubleConsonants.includes(char.codePointAt(0))) {
+        if (trailingDoubleConsonants.includes(char.codePointAt(0))) {
             const separatedChars = splitKoreanChar(char.codePointAt(0));
             fullySplit.push(separatedChars[0]);
             fullySplit.push(separatedChars[1]);
@@ -67,28 +72,28 @@ function splitKoreanStr(input) {
 function splitKoreanChar(combinedChar) {
     // splits a combined Korean character into parts
     switch (combinedChar) {
-        case 0x11AA: // ᆪ
-            return [0x11A8, 0x1109]; // ㄱㅅ
-        case 0x11AC: // ᆬ
-            return [0x11AB, 0x110C]; // ㄴㅈ
-        case 0x11AD: // ᆭ
-            return [0x11AB, 0x1112]; // ㄴㅎ
-        case 0x11B0: // ᆰ
-            return [0x11AF, 0x1100]; // ㄹㄱ
-        case 0x11B1: // ᆱ
-            return [0x11AF, 0x1106]; // ㄹㅁ
-        case 0x11B2: // ᆲ
-            return [0x11AF, 0x1107]; // ㄹㅂ
-        case 0x11B3: // ᆳ
-            return [0x11AF, 0x1109]; // ㄹㅅ
-        case 0x11B4: // ᆴ
-            return [0x11AF, 0x1110]; // ㄹㅌ
-        case 0x11B5: // ᆵ
-            return [0x11AF, 0x1111]; // ㄹㅍ
-        case 0x11B6: // ᆶ
-            return [0x11AF, 0x1112]; // ㄹㅎ
-        case 0x11B9: // ᆹ
-            return [0x11B8, 0x1109]; // ㅂㅅ
+        case TRAILING_KIYEOKSIOS: // ᆪ
+            return [TRAILING_KIYEOK, LEADING_SIOS]; // ㄱㅅ
+        case TRAILING_NIEUNCIEUC: // ᆬ
+            return [TRAILING_NIEUN, LEADING_CIEUC]; // ㄴㅈ
+        case TRAILING_NIEUNHIEUH: // ᆭ
+            return [TRAILING_NIEUN, LEADING_HIEUH]; // ㄴㅎ
+        case TRAILING_RIEULKIYEOK: // ᆰ
+            return [TRAILING_RIEUL, LEADING_KIYEOK]; // ㄹㄱ
+        case TRAILING_RIEULMIEUM: // ᆱ
+            return [TRAILING_RIEUL, LEADING_MIEUM]; // ㄹㅁ
+        case TRAILING_RIEULPIEUP: // ᆲ
+            return [TRAILING_RIEUL, LEADING_PIEUP]; // ㄹㅂ
+        case TRAILING_RIEULSIOS: // ᆳ
+            return [TRAILING_RIEUL, LEADING_SIOS]; // ㄹㅅ
+        case TRAILING_RIEULTHIEUTH: // ᆴ
+            return [TRAILING_RIEUL, LEADING_THIEUTH]; // ㄹㅌ
+        case TRAILING_RIEULPHIEUPH: // ᆵ
+            return [TRAILING_RIEUL, LEADING_PHIEUPH]; // ㄹㅍ
+        case TRAILING_RIEULHIEUH: // ᆶ
+            return [TRAILING_RIEUL, LEADING_HIEUH]; // ㄹㅎ
+        case TRAILING_PIEUPSIOS: // ᆹ
+            return [TRAILING_PIEUP, LEADING_SIOS]; // ㅂㅅ
         default:
             return [combinedChar, combinedChar];
     }
@@ -97,7 +102,7 @@ function splitKoreanChar(combinedChar) {
 function resyllabify(input) {
     const splitInput = splitKoreanStr(input);
     for (let i = 0; i < splitInput.length; i++) {
-        if (isConsonant(splitInput[i]) && splitInput[i + 1] === 0x110B) {
+        if (isConsonant(splitInput[i]) && splitInput[i + 1] === LEADING_IEUNG) {
             splitInput.splice(i + 1, 1);
             splitInput[i] = starterCode(splitInput[i]);
         }
@@ -120,19 +125,19 @@ function neutralizeCoda(input) {
         // check for coda neutralization rules
         if (splitBlocks[i].length > 2) {
             switch(splitBlocks[i][2]) {
-                case 0x11C1: // ᇁ
-                    splitBlocks[i][2] = 0x11B8; // ᆸ
+                case TRAILING_PHIEUPH: // ᇁ
+                    splitBlocks[i][2] = TRAILING_PIEUP; // ᆸ
                     break;
-                case 0x11C0: // ᇀ
-                case 0x11BA: // ᆺ
-                case 0x11BD: // ᆽ
-                case 0x11BE: // ᆾ
-                case 0x11C2: // ᇂ
-                    splitBlocks[i][2] = 0x11AE; // ᆮ
+                case TRAILING_THIEUTH: // ᇀ
+                case TRAILING_SIOS: // ᆺ
+                case TRAILING_CIEUC: // ᆽ
+                case TRAILING_CHIEUCH: // ᆾ
+                case TRAILING_HIEUH: // ᇂ
+                    splitBlocks[i][2] = TRAILING_TIKEUT; // ᆮ
                     break;
-                case 0x11BF: // ᆿ
-                case 0x11A9: // ᆩ
-                    splitBlocks[i][2] = 0x11A8; // ᆨ
+                case TRAILING_KHIEUKH: // ᆿ
+                case TRAILING_SSANGKIYEOK: // ᆩ
+                    splitBlocks[i][2] = TRAILING_KIYEOK; // ᆨ
                     break;
             }
         }
